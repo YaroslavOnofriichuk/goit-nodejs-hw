@@ -12,6 +12,7 @@ const joiUserSchema = Joi.object({
     .valid("starter", "pro", "business")
     .default("starter"),
   token: Joi.string().default(null),
+  avatarURL: Joi.string().default(null),
 });
 
 const userSchema = Schema(
@@ -33,6 +34,10 @@ const userSchema = Schema(
       default: "starter",
     },
     token: {
+      type: String,
+      default: null,
+    },
+    avatarURL: {
       type: String,
       default: null,
     },
