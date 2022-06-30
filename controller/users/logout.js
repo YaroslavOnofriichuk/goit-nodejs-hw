@@ -1,6 +1,7 @@
 const {
   userSchema: { User },
 } = require("../../service");
+const createError = require("http-errors");
 
 const logout = async (req, res, next) => {
   const { _id } = req.user;
@@ -8,7 +9,7 @@ const logout = async (req, res, next) => {
   const user = await User.findByIdAndUpdate(_id, { token: null });
 
   if (!user) {
-    res.status(401).json({ message: "Not authorized" });
+    return next(createError(401, "Not authorized"));
   } else {
     res.status(204).json({ message: "No Content" });
   }

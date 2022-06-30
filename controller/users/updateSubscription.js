@@ -1,6 +1,7 @@
 const {
   userSchema: { User },
 } = require("../../service");
+const createError = require("http-errors");
 
 const updateSubscription = async (req, res, next) => {
   const { _id } = req.user;
@@ -11,9 +12,9 @@ const updateSubscription = async (req, res, next) => {
     subscription !== "pro" &&
     subscription !== "business"
   ) {
-    res.status(400).json({
-      message: "'subscription' must be one of [starter, pro, business]",
-    });
+    return next(
+      createError(400, "'subscription' must be one of [starter, pro, business]")
+    );
   } else {
     const user = await User.findByIdAndUpdate(_id, {
       subscription,

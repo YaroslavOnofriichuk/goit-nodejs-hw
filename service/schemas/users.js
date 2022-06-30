@@ -13,6 +13,8 @@ const joiUserSchema = Joi.object({
     .default("starter"),
   token: Joi.string().default(null),
   avatarURL: Joi.string().default(null),
+  verify: Joi.boolean().default(false),
+  verificationToken: Joi.string(),
 });
 
 const userSchema = Schema(
@@ -40,6 +42,14 @@ const userSchema = Schema(
     avatarURL: {
       type: String,
       default: null,
+    },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
     },
   },
   { versionKey: false, timestamps: true }

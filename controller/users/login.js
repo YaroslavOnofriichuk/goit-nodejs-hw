@@ -3,18 +3,23 @@ const {
 } = require("../../service");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
   const { error } = joiUserSchema.validate({ ...req.body });
   let checkPasswordResult = false;
-  const { SECRET_KEY } = process.env;
+  const { JWT_SECRET_KEY } = process.env;
 
   if (error) {
-    res.status(400).json({ message: error.message });
+    return next(createError(400, error.message));
   }
 
   const user = await User.findOne({ email });
+
+  if (!user?.verify) {
+    return next(createError(401, "User is not verified"));
+  }
 
   try {
     checkPasswordResult = await bcrypt.compare(password, user.password);
@@ -23,14 +28,14 @@ const login = async (req, res, next) => {
   }
 
   if (!user || !checkPasswordResult) {
-    res.status(401).json({ message: "Email or password is wrong" });
+    return next(createError(401, "Email or password is wrong"));
   }
 
   const payload = {
     id: user._id,
   };
 
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: "1h" });
 
   const newUser = await User.findByIdAndUpdate(user._id, { token });
 
