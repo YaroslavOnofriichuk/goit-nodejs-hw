@@ -4,6 +4,7 @@ const {
 const Jimp = require("jimp");
 const fs = require("fs/promises");
 const path = require("path");
+const createError = require("http-errors");
 
 const avatars = async (req, res, next) => {
   const { _id: id } = req.user;
@@ -16,8 +17,7 @@ const avatars = async (req, res, next) => {
     await image.resize(250, 250);
     await image.writeAsync(filePath);
   } catch (error) {
-    res.status(401).json({ message: "Not authorized" });
-    throw new Error(error.message);
+    return next(createError(401, "Not authorized"));
   }
 
   try {
@@ -32,8 +32,7 @@ const avatars = async (req, res, next) => {
     res.status(200).json({ avatarURL: user.avatarURL });
   } catch (error) {
     await fs.unlink(filePath);
-    res.status(401).json({ message: "Not authorized" });
-    throw new Error(error.message);
+    return next(createError(401, "Not authorized"));
   }
 };
 

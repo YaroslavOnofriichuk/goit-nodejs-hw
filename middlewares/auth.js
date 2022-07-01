@@ -2,29 +2,30 @@ const {
   userSchema: { User },
 } = require("../service");
 const jwt = require("jsonwebtoken");
+const createError = require("http-errors");
 
 const auth = async (req, res, next) => {
   const { authorization = "" } = req.headers;
   const [bearer, token] = authorization.split(" ");
-  const { SECRET_KEY } = process.env;
+  const { JWT_SECRET_KEY } = process.env;
   let userId = "";
 
   if (bearer !== "Bearer") {
-    res.status(401).json({ message: "Not authorized" });
+    return next(createError(401, "Not authorized"));
   }
 
   try {
-    const { id } = jwt.verify(token, SECRET_KEY);
+    const { id } = jwt.verify(token, JWT_SECRET_KEY);
     userId = id;
   } catch (error) {
     console.log(error);
-    res.status(401).json({ message: "Not authorized" });
+    return next(createError(401, "Not authorized"));
   }
 
   const user = await User.findById(userId);
 
   if (!user || !user.token) {
-    res.status(401).json({ message: "Not authorized" });
+    return next(createError(401, "Not authorized"));
   }
 
   req.user = user;
